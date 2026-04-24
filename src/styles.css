@@ -32,6 +32,9 @@
 
   font-family: var(--cej-font-sans);
   color: var(--cej-text);
+  background: var(--cej-bg);
+  border-radius: var(--cej-radius-lg);
+  padding: 16px;
   margin: 1.5rem 0;
 }
 
