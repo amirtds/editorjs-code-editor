@@ -6,26 +6,6 @@
   <title>editorjs-code-editor — Live Demo</title>
   <meta name="description" content="Code editor block for Editor.js with in-browser Python execution via Pyodide WebAssembly" />
 
-  <!-- Editor.js core -->
-  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.8/dist/editorjs.umd.js"></script>
-
-  <!-- Import map: pin all CodeMirror packages to compatible versions via esm.sh -->
-  <script type="importmap">
-  {
-    "imports": {
-      "react": "https://esm.sh/react@19.1.0",
-      "react/jsx-runtime": "https://esm.sh/react@19.1.0/jsx-runtime",
-      "react-dom/client": "https://esm.sh/react-dom@19.1.0/client",
-      "@uiw/react-codemirror": "https://esm.sh/@uiw/react-codemirror@4.23.7?external=react,react-dom",
-      "@uiw/codemirror-theme-github": "https://esm.sh/@uiw/codemirror-theme-github@4.23.8?external=react,react-dom",
-      "@codemirror/lang-python": "https://esm.sh/@codemirror/lang-python@6.1.7",
-      "@codemirror/lang-javascript": "https://esm.sh/@codemirror/lang-javascript@6.2.2",
-      "@codemirror/lang-html": "https://esm.sh/@codemirror/lang-html@6.4.9",
-      "@codemirror/lang-css": "https://esm.sh/@codemirror/lang-css@6.3.1"
-    }
-  }
-  </script>
-
   <!-- Plugin CSS -->
   <link rel="stylesheet" href="../src/styles.css" />
 
@@ -39,7 +19,6 @@
       min-height: 100vh;
     }
 
-    /* ── Header ── */
     .demo-header {
       background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
       color: white;
@@ -91,11 +70,21 @@
 
     .demo-badge.green { color: #4ade80; border-color: rgba(74, 222, 128, 0.2); background: rgba(74, 222, 128, 0.08); }
 
-    /* ── Main ── */
     .demo-main {
       max-width: 780px;
       margin: -1.5rem auto 0;
       padding: 0 1rem 3rem;
+    }
+
+    .demo-tip {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 0.8rem;
+      color: #1e40af;
+      margin-bottom: 1rem;
+      line-height: 1.5;
     }
 
     #editorjs {
@@ -124,23 +113,12 @@
       font-family: inherit;
     }
 
-    .demo-btn-primary {
-      background: #22c55e;
-      color: white;
-    }
-
+    .demo-btn-primary { background: #22c55e; color: white; }
     .demo-btn-primary:hover { background: #16a34a; }
-
-    .demo-btn-ghost {
-      background: #f1f5f9;
-      color: #475569;
-    }
-
+    .demo-btn-ghost { background: #f1f5f9; color: #475569; }
     .demo-btn-ghost:hover { background: #e2e8f0; }
 
-    .demo-output {
-      margin-top: 1.5rem;
-    }
+    .demo-output { margin-top: 1.5rem; }
 
     .demo-output h3 {
       font-size: 0.75rem;
@@ -171,34 +149,8 @@
       color: #94a3b8;
     }
 
-    .demo-footer a {
-      color: #22c55e;
-      text-decoration: none;
-    }
-
+    .demo-footer a { color: #22c55e; text-decoration: none; }
     .demo-footer a:hover { text-decoration: underline; }
-
-    /* ── Loading ── */
-    .demo-loading {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 3rem;
-      color: #94a3b8;
-      font-size: 0.875rem;
-    }
-
-    .demo-loading .spin {
-      width: 16px;
-      height: 16px;
-      border: 2px solid #e2e8f0;
-      border-top-color: #22c55e;
-      border-radius: 50%;
-      animation: spin 0.6s linear infinite;
-    }
-
-    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
@@ -215,12 +167,11 @@
   </div>
 
   <div class="demo-main">
-    <div id="editorjs">
-      <div class="demo-loading">
-        <div class="spin"></div>
-        Loading editor...
-      </div>
+    <div class="demo-tip">
+      Click the <strong>+</strong> button below (or press <strong>Tab</strong>) and select <strong>Code Editor</strong> from the block menu. Then try selecting Python, writing code, and clicking <strong>Run</strong>.
     </div>
+
+    <div id="editorjs"></div>
 
     <div class="demo-actions">
       <button class="demo-btn demo-btn-primary" onclick="saveEditor()">Save & Show Data</button>
@@ -241,39 +192,37 @@
     Built by <a href="https://cubite.io">Cubite</a>
   </div>
 
-  <script type="module">
-    // Import the plugin — resolved via import map to esm.sh CDN
-    import CodeEditor from "../src/index.js";
+  <!-- Editor.js core -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.8/dist/editorjs.umd.js"></script>
 
-    const editor = new window.EditorJS({
+  <!-- Bundled plugin (React + CodeMirror included) -->
+  <script src="bundle.js"></script>
+
+  <script>
+    var editor = new window.EditorJS({
       holder: "editorjs",
-      placeholder: "Click the + button and add a Code Editor block →",
+      placeholder: "Click + and select Code Editor...",
       tools: {
         codeEditor: {
-          class: CodeEditor,
+          class: CodeEditor.default,
           config: {
             pyodideVersion: "0.27.6",
             preinstallPackages: [],
-            onNotify: ({ type, message }) => {
-              console.log(`[${type}] ${message}`);
+            onNotify: function(msg) {
+              console.log("[" + msg.type + "] " + msg.message);
             },
           },
         },
       },
-      onReady: () => {
-        const loading = document.querySelector(".demo-loading");
-        if (loading) loading.remove();
-      },
     });
 
-    window.saveEditor = async () => {
-      try {
-        const data = await editor.save();
+    function saveEditor() {
+      editor.save().then(function(data) {
         document.getElementById("output").textContent = JSON.stringify(data, null, 2);
-      } catch (err) {
-        document.getElementById("output").textContent = `Error: ${err.message}`;
-      }
-    };
+      }).catch(function(err) {
+        document.getElementById("output").textContent = "Error: " + err.message;
+      });
+    }
   </script>
 
 </body>

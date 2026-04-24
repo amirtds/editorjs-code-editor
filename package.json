@@ -4,15 +4,18 @@
   "description": "Code editor block for Editor.js with 12 languages, 4 styles, and in-browser Python execution via Pyodide WebAssembly",
   "main": "src/index.js",
   "style": "src/styles.css",
+  "scripts": {
+    "build:demo": "esbuild src/index.js --bundle --format=iife --global-name=CodeEditor --outfile=demo/bundle.js --loader:.js=jsx --target=es2020 --define:process.env.NODE_ENV='\"production\"'"
+  },
   "peerDependencies": {
-    "react": ">=17.0.0",
-    "react-dom": ">=17.0.0",
-    "@uiw/react-codemirror": ">=4.0.0",
-    "@uiw/codemirror-theme-github": ">=4.0.0",
-    "@codemirror/lang-python": ">=6.0.0",
-    "@codemirror/lang-javascript": ">=6.0.0",
+    "@codemirror/lang-css": ">=6.0.0",
     "@codemirror/lang-html": ">=6.0.0",
-    "@codemirror/lang-css": ">=6.0.0"
+    "@codemirror/lang-javascript": ">=6.0.0",
+    "@codemirror/lang-python": ">=6.0.0",
+    "@uiw/codemirror-theme-github": ">=4.0.0",
+    "@uiw/react-codemirror": ">=4.0.0",
+    "react": ">=17.0.0",
+    "react-dom": ">=17.0.0"
   },
   "keywords": [
     "editorjs",
@@ -39,5 +42,16 @@
     "src",
     "README.md",
     "LICENSE"
-  ]
+  ],
+  "devDependencies": {
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.11",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/lang-python": "^6.2.1",
+    "@uiw/codemirror-theme-github": "^4.25.9",
+    "@uiw/react-codemirror": "^4.25.9",
+    "esbuild": "^0.28.0",
+    "react": "^19.2.5",
+    "react-dom": "^19.2.5"
+  }
 }
