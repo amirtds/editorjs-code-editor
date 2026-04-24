@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>EditorJS Code Editor — Demo</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #fafafa;
+      color: #1f2937;
+      padding: 2rem;
+    }
+    .header {
+      max-width: 700px;
+      margin: 0 auto 2rem;
+      text-align: center;
+    }
+    .header h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
+    .header p { color: #6b7280; font-size: 0.9rem; }
+    #editorjs {
+      max-width: 700px;
+      margin: 0 auto;
+      background: white;
+      border: 1px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 1rem;
+      min-height: 400px;
+    }
+    .output-section {
+      max-width: 700px;
+      margin: 2rem auto 0;
+    }
+    .output-section h3 { font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem; }
+    #output {
+      background: #1e1e1e;
+      color: #ccc;
+      font-family: monospace;
+      font-size: 0.8rem;
+      padding: 1rem;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      min-height: 80px;
+    }
+    button.save-btn {
+      display: block;
+      max-width: 700px;
+      margin: 1rem auto;
+      padding: 8px 20px;
+      background: #22c55e;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.875rem;
+    }
+    button.save-btn:hover { background: #16a34a; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <h1>editorjs-code-editor</h1>
+    <p>Code editor block for Editor.js with in-browser Python execution via Pyodide</p>
+  </div>
+
+  <div id="editorjs"></div>
+  <button class="save-btn" onclick="saveEditor()">Save &amp; Show Data</button>
+
+  <div class="output-section">
+    <h3>Saved block data (JSON):</h3>
+    <pre id="output">Click "Save & Show Data" to see the output...</pre>
+  </div>
+
+  <!--
+    NOTE: This demo uses CDN imports for simplicity.
+    In a real project, install via npm and import with your bundler.
+
+    To run this demo locally:
+    1. Serve this directory with any static file server
+    2. Open in a browser that supports ES modules
+
+    The plugin requires React and CodeMirror as peer dependencies,
+    which are loaded here via CDN for demo purposes.
+  -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.8/dist/editorjs.umd.js"></script>
+
+  <script type="module">
+    // In a real project you'd do: import CodeEditor from 'editorjs-code-editor'
+    // For this demo, the plugin needs to be bundled. See README for install instructions.
+
+    // Placeholder — in production, the plugin is imported via npm
+    const editor = new window.EditorJS({
+      holder: 'editorjs',
+      placeholder: 'Add a Code Editor block from the + menu...',
+      tools: {
+        // codeEditor: {
+        //   class: CodeEditor,
+        //   config: {
+        //     pyodideVersion: '0.27.6',
+        //     preinstallPackages: [],
+        //     onNotify: ({ type, message }) => console.log(`[${type}] ${message}`),
+        //   },
+        // },
+      },
+    });
+
+    window.saveEditor = async () => {
+      const data = await editor.save();
+      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+    };
+  </script>
+</body>
+</html>
