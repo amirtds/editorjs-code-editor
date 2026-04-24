@@ -4,6 +4,8 @@ A feature-rich code editor block for [Editor.js](https://editorjs.io) with **in-
 
 No server required — Python runs entirely in the browser.
 
+**[Live Demo](https://amirtds.github.io/editorjs-code-editor/demo/)**
+
 ## Features
 
 - **Run Python in the browser** — powered by Pyodide WebAssembly, no backend needed

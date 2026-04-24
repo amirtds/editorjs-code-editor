@@ -3,113 +3,278 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>EditorJS Code Editor — Demo</title>
+  <title>editorjs-code-editor — Live Demo</title>
+  <meta name="description" content="Code editor block for Editor.js with in-browser Python execution via Pyodide WebAssembly" />
+
+  <!-- Editor.js core -->
+  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.8/dist/editorjs.umd.js"></script>
+
+  <!-- Import map: pin all CodeMirror packages to compatible versions via esm.sh -->
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://esm.sh/react@19.1.0",
+      "react/jsx-runtime": "https://esm.sh/react@19.1.0/jsx-runtime",
+      "react-dom/client": "https://esm.sh/react-dom@19.1.0/client",
+      "@uiw/react-codemirror": "https://esm.sh/@uiw/react-codemirror@4.23.7?external=react,react-dom",
+      "@uiw/codemirror-theme-github": "https://esm.sh/@uiw/codemirror-theme-github@4.23.8?external=react,react-dom",
+      "@codemirror/lang-python": "https://esm.sh/@codemirror/lang-python@6.1.7",
+      "@codemirror/lang-javascript": "https://esm.sh/@codemirror/lang-javascript@6.2.2",
+      "@codemirror/lang-html": "https://esm.sh/@codemirror/lang-html@6.4.9",
+      "@codemirror/lang-css": "https://esm.sh/@codemirror/lang-css@6.3.1"
+    }
+  }
+  </script>
+
+  <!-- Plugin CSS -->
+  <link rel="stylesheet" href="../src/styles.css" />
+
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #fafafa;
-      color: #1f2937;
-      padding: 2rem;
+      background: #f8fafc;
+      color: #1e293b;
+      min-height: 100vh;
     }
-    .header {
-      max-width: 700px;
-      margin: 0 auto 2rem;
+
+    /* ── Header ── */
+    .demo-header {
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      color: white;
+      padding: 3rem 1.5rem 2.5rem;
       text-align: center;
     }
-    .header h1 { font-size: 1.5rem; margin-bottom: 0.5rem; }
-    .header p { color: #6b7280; font-size: 0.9rem; }
+
+    .demo-header h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.02em;
+    }
+
+    .demo-header h1 code {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 1.5rem;
+    }
+
+    .demo-header p {
+      color: #94a3b8;
+      font-size: 0.95rem;
+      max-width: 600px;
+      margin: 0 auto 1.5rem;
+      line-height: 1.6;
+    }
+
+    .demo-badges {
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .demo-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 12px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      color: #cbd5e1;
+    }
+
+    .demo-badge.green { color: #4ade80; border-color: rgba(74, 222, 128, 0.2); background: rgba(74, 222, 128, 0.08); }
+
+    /* ── Main ── */
+    .demo-main {
+      max-width: 780px;
+      margin: -1.5rem auto 0;
+      padding: 0 1rem 3rem;
+    }
+
     #editorjs {
-      max-width: 700px;
-      margin: 0 auto;
       background: white;
-      border: 1px solid #e5e7eb;
+      border: 1px solid #e2e8f0;
       border-radius: 12px;
       padding: 1rem;
-      min-height: 400px;
+      min-height: 300px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
     }
-    .output-section {
-      max-width: 700px;
-      margin: 2rem auto 0;
+
+    .demo-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 1rem;
     }
-    .output-section h3 { font-size: 0.875rem; color: #6b7280; margin-bottom: 0.5rem; }
+
+    .demo-btn {
+      padding: 8px 18px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.15s;
+      font-family: inherit;
+    }
+
+    .demo-btn-primary {
+      background: #22c55e;
+      color: white;
+    }
+
+    .demo-btn-primary:hover { background: #16a34a; }
+
+    .demo-btn-ghost {
+      background: #f1f5f9;
+      color: #475569;
+    }
+
+    .demo-btn-ghost:hover { background: #e2e8f0; }
+
+    .demo-output {
+      margin-top: 1.5rem;
+    }
+
+    .demo-output h3 {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
     #output {
-      background: #1e1e1e;
-      color: #ccc;
-      font-family: monospace;
+      background: #1e293b;
+      color: #94a3b8;
+      font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, monospace;
       font-size: 0.8rem;
       padding: 1rem;
       border-radius: 8px;
       white-space: pre-wrap;
-      min-height: 80px;
+      min-height: 60px;
+      max-height: 300px;
+      overflow: auto;
     }
-    button.save-btn {
-      display: block;
-      max-width: 700px;
-      margin: 1rem auto;
-      padding: 8px 20px;
-      background: #22c55e;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
+
+    .demo-footer {
+      text-align: center;
+      padding: 2rem 1rem;
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    .demo-footer a {
+      color: #22c55e;
+      text-decoration: none;
+    }
+
+    .demo-footer a:hover { text-decoration: underline; }
+
+    /* ── Loading ── */
+    .demo-loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 3rem;
+      color: #94a3b8;
       font-size: 0.875rem;
     }
-    button.save-btn:hover { background: #16a34a; }
+
+    .demo-loading .spin {
+      width: 16px;
+      height: 16px;
+      border: 2px solid #e2e8f0;
+      border-top-color: #22c55e;
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <div class="header">
-    <h1>editorjs-code-editor</h1>
-    <p>Code editor block for Editor.js with in-browser Python execution via Pyodide</p>
+
+  <div class="demo-header">
+    <h1><code>editorjs-code-editor</code></h1>
+    <p>A code editor block for Editor.js with in-browser Python execution via Pyodide WebAssembly. No server required.</p>
+    <div class="demo-badges">
+      <span class="demo-badge green">Python in the browser</span>
+      <span class="demo-badge">12 languages</span>
+      <span class="demo-badge">4 styles</span>
+      <span class="demo-badge">MIT</span>
+    </div>
   </div>
 
-  <div id="editorjs"></div>
-  <button class="save-btn" onclick="saveEditor()">Save &amp; Show Data</button>
+  <div class="demo-main">
+    <div id="editorjs">
+      <div class="demo-loading">
+        <div class="spin"></div>
+        Loading editor...
+      </div>
+    </div>
 
-  <div class="output-section">
-    <h3>Saved block data (JSON):</h3>
-    <pre id="output">Click "Save & Show Data" to see the output...</pre>
+    <div class="demo-actions">
+      <button class="demo-btn demo-btn-primary" onclick="saveEditor()">Save & Show Data</button>
+      <button class="demo-btn demo-btn-ghost" onclick="document.getElementById('output').textContent = ''">Clear Output</button>
+    </div>
+
+    <div class="demo-output">
+      <h3>Saved block data (JSON)</h3>
+      <pre id="output">Click "Save & Show Data" after adding a Code Editor block...</pre>
+    </div>
   </div>
 
-  <!--
-    NOTE: This demo uses CDN imports for simplicity.
-    In a real project, install via npm and import with your bundler.
-
-    To run this demo locally:
-    1. Serve this directory with any static file server
-    2. Open in a browser that supports ES modules
-
-    The plugin requires React and CodeMirror as peer dependencies,
-    which are loaded here via CDN for demo purposes.
-  -->
-
-  <script src="https://cdn.jsdelivr.net/npm/@editorjs/editorjs@2.30.8/dist/editorjs.umd.js"></script>
+  <div class="demo-footer">
+    <a href="https://github.com/amirtds/editorjs-code-editor">GitHub</a>
+    &nbsp;&middot;&nbsp;
+    <a href="https://www.npmjs.com/package/editorjs-code-editor">npm</a>
+    &nbsp;&middot;&nbsp;
+    Built by <a href="https://cubite.io">Cubite</a>
+  </div>
 
   <script type="module">
-    // In a real project you'd do: import CodeEditor from 'editorjs-code-editor'
-    // For this demo, the plugin needs to be bundled. See README for install instructions.
+    // Import the plugin — resolved via import map to esm.sh CDN
+    import CodeEditor from "../src/index.js";
 
-    // Placeholder — in production, the plugin is imported via npm
     const editor = new window.EditorJS({
-      holder: 'editorjs',
-      placeholder: 'Add a Code Editor block from the + menu...',
+      holder: "editorjs",
+      placeholder: "Click the + button and add a Code Editor block →",
       tools: {
-        // codeEditor: {
-        //   class: CodeEditor,
-        //   config: {
-        //     pyodideVersion: '0.27.6',
-        //     preinstallPackages: [],
-        //     onNotify: ({ type, message }) => console.log(`[${type}] ${message}`),
-        //   },
-        // },
+        codeEditor: {
+          class: CodeEditor,
+          config: {
+            pyodideVersion: "0.27.6",
+            preinstallPackages: [],
+            onNotify: ({ type, message }) => {
+              console.log(`[${type}] ${message}`);
+            },
+          },
+        },
+      },
+      onReady: () => {
+        const loading = document.querySelector(".demo-loading");
+        if (loading) loading.remove();
       },
     });
 
     window.saveEditor = async () => {
-      const data = await editor.save();
-      document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+      try {
+        const data = await editor.save();
+        document.getElementById("output").textContent = JSON.stringify(data, null, 2);
+      } catch (err) {
+        document.getElementById("output").textContent = `Error: ${err.message}`;
+      }
     };
   </script>
+
 </body>
 </html>
